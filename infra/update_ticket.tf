@@ -1,15 +1,15 @@
-data "archive_file" "create_ticket" {
+data "archive_file" "update_ticket" {
   type        = "zip"
-  source_file = "code/create_ticket/main.py"
-  output_path = "code/create_ticket/create_ticket.zip"
+  source_file = "../code/update_ticket/main.py"
+  output_path = "../code/update_ticket/update_ticket.zip"
 }
 
-resource "aws_lambda_function" "create_ticket" {
-  filename         = "code/create_ticket/create_ticket.zip"
-  function_name    = "create_ticket"
-  description      = "Create a ticket"
+resource "aws_lambda_function" "update_ticket" {
+  filename         = "../code/update_ticket/update_ticket.zip"
+  function_name    = "update_ticket"
+  description      = "Update a ticket"
   role             = aws_iam_role.cloudwatch_emf_role.arn
-  source_code_hash = data.archive_file.create_ticket.output_base64sha256
+  source_code_hash = data.archive_file.update_ticket.output_base64sha256
   handler          = "main.handler"
   runtime          = "python3.10"
   architectures    = ["arm64"]

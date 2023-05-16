@@ -1,11 +1,11 @@
 data "archive_file" "business_metrics" {
   type        = "zip"
-  source_dir  = "code/business_metrics/"
-  output_path = "code/business_metrics/business_metrics.zip"
+  source_dir  = "../code/business_metrics/"
+  output_path = "../code/business_metrics/business_metrics.zip"
 }
 
 resource "aws_lambda_function" "business_metrics" {
-  filename         = "code/business_metrics/business_metrics.zip"
+  filename         = "../code/business_metrics/business_metrics.zip"
   function_name    = "business_metrics"
   description      = "Generate cloudwatch metrics using emf"
   role             = aws_iam_role.cloudwatch_emf_role.arn
