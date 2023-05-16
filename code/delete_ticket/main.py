@@ -25,7 +25,9 @@ def handler(event: dict, context) -> dict:
     if response["Count"] > 0:
         return {
             "statusCode": 400,
-            "body": json.dumps("The item is already in progress"),
+            "body": json.dumps(
+                "Not permitted to close a ticket in the 'opened' status"
+            ),
         }
 
     _time_to_expires = datetime.now() + timedelta(days=1)
@@ -33,11 +35,7 @@ def handler(event: dict, context) -> dict:
 
     table.update_item(
         Key={'ticket_id': event['pathParameters'].get('id')},
-        UpdateExpression='set ticket_status=:st, deleted_at=:up, _time_to_expires=:ttl',
-        ExpressionAttributeValues={
-            ':st': 'deleted',
-            ':up': datetime.now().isoformat(),
-            ':ttl': _time_to_expires_unix,
-        },
+        UpdateExpression='set ticket_status=:st, deleted_at=:up',
+        ExpressionAttributeValues={':st': 'deleted', ':up': datetime.now().isoformat()},
     )
     return {'statusCode': 204}

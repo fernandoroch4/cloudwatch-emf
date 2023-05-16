@@ -1,7 +1,16 @@
+variable "archive_file_excludes" {
+  type = set(string)
+  default = [
+    "business_metrics.zip",
+    "requirements.txt",
+  ]
+}
+
 data "archive_file" "business_metrics" {
   type        = "zip"
   source_dir  = "../code/business_metrics/"
   output_path = "../code/business_metrics/business_metrics.zip"
+  excludes    = var.archive_file_excludes
 }
 
 resource "aws_lambda_function" "business_metrics" {
@@ -33,5 +42,5 @@ resource "aws_lambda_function" "business_metrics" {
 resource "aws_lambda_event_source_mapping" "stream" {
   event_source_arn  = aws_dynamodb_table.ticket.stream_arn
   function_name     = aws_lambda_function.business_metrics.arn
-  starting_position = "LATEST"
+  starting_position = "TRIM_HORIZON"
 }

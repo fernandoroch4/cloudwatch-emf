@@ -31,7 +31,7 @@ def handler(event: dict, context) -> dict:
     if response["Count"] > 0:
         return {
             "statusCode": 400,
-            "body": json.dumps("The item is already in this state"),
+            "body": json.dumps(f"The item is already in the '{status}' status"),
         }
 
     update_expression = ""
