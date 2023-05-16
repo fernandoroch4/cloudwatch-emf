@@ -1,9 +1,6 @@
-import argparse
-import concurrent.futures
-import json
 import time
 from uuid import uuid4
-from random import randint
+from random import randint, choice
 from datetime import datetime, timedelta
 
 import requests
@@ -18,7 +15,11 @@ TICKET_API_URL = 'https://3v6s2g0n3b.execute-api.us-east-1.amazonaws.com/dev/tic
 
 
 def generate_data(
-    items, total_of_opened_items, total_of_closed_items, total_of_approved_items
+    items,
+    total_of_opened_items,
+    total_of_closed_items,
+    total_of_approved_items,
+    total_of_deleted_items,
 ):
     tickets_id = []
 
@@ -39,22 +40,28 @@ def generate_data(
             tickets_id.append(response.json()['ticket_id'])
 
     for ticket_id in tickets_id:
-        data = {'status': random.choice(['closed', 'deleted'])}
+        status = choice(['closed', 'deleted'])
+        data = {'status': status}
 
         response = requests.patch(
             url=f'{TICKET_API_URL}/{ticket_id}',
             json=data,
             headers={'Content-Type': 'application/json'},
         )
-        total_of_closed_items += 1
+
+        if status == 'deleted':
+            del tickets_id[ticket_id]
+            total_of_deleted_items += 1
+        else:
+            total_of_closed_items += 1
+
         time.sleep(0.1)
 
     for idx in range(len(tickets_id)):
         if idx % 2 == 0:
-            data = {'status': 'approved'}
-            response = requests.patch(
+            requests.patch(
                 url=f'{TICKET_API_URL}/{tickets_id[idx]}',
-                json=data,
+                json={'status': 'approved'},
                 headers={'Content-Type': 'application/json'},
             )
             total_of_approved_items += 1
@@ -65,6 +72,7 @@ if __name__ == '__main__':
     total_of_opened_items = 0
     total_of_closed_items = 0
     total_of_approved_items = 0
+    total_of_deleted_items = 0
     start_time = time.perf_counter()
 
     print('starting generator for 1000 rounds')
@@ -77,12 +85,12 @@ if __name__ == '__main__':
             total_of_opened_items,
             total_of_closed_items,
             total_of_approved_items,
+            total_of_deleted_items,
         )
         total_of_round_time = round((time.perf_counter() - start_round_time) / 60, 2)
         print(f'round {round_number} finished in {total_of_round_time} minutes')
-        print(
-            f'waiting next round starting on {(datetime.now() + timedelta(minutes=1)).isoformat()}\n'
-        )
+        # fmt: off
+        print(f'waiting next round starting on {(datetime.now() + timedelta(minutes=1)).isoformat()}\n')
         time.sleep(60)
 
     total_of_time = round((time.perf_counter() - start_time) / 60, 2)
@@ -93,6 +101,7 @@ if __name__ == '__main__':
             Opened: {total_of_opened_items}
             Closed: {total_of_closed_items}
             Approved: {total_of_approved_items}
+            Deleted: {total_of_deleted_items}
 
             Time elapsed: {total_of_time} minutes
     '''
