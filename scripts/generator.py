@@ -1,7 +1,8 @@
+import sys
 import time
-from uuid import uuid4
-from random import randint, choice
 from datetime import datetime, timedelta
+from random import choice, randint
+from uuid import uuid4
 
 import requests
 from faker import Faker
@@ -75,8 +76,10 @@ if __name__ == '__main__':
     total_of_deleted_items = 0
     start_time = time.perf_counter()
 
-    print('starting generator for 1000 rounds')
-    for round_number in range(1, 1001):
+    max_interactions = int(sys.argv[1] if len(sys.argv) > 0 else 10)
+
+    print(f'starting generator for {max_interactions} rounds')
+    for round_number in range(1, max_interactions + 1):
         start_round_time = time.perf_counter()
         random_value = randint(1, 11)
         print(f'starting round {round_number} with {random_value} values')
