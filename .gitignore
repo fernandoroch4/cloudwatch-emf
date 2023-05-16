@@ -39,3 +39,4 @@ terraform.rc
 __pycache__
 
 code/*/*.zip
+code/business_metrics/**/
